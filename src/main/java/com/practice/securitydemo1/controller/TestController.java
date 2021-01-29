@@ -9,4 +9,9 @@ public class TestController {
   public String hello() {
     return "Hello Security";
   }
+
+  @GetMapping("/index")
+  public String index () {
+    return "This is index page.";
+  }
 }
