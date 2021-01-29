@@ -25,7 +25,7 @@ public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
     http.formLogin() // 自定義自己編寫的登入頁面
         .loginPage("/login.html") // 登入頁面設置
         .loginProcessingUrl("/user/login") // 登入訪問路徑
-        .defaultSuccessUrl("/index") // 登入成功後，跳轉路徑
+        .defaultSuccessUrl("/success.html") // 登入成功後，跳轉路徑
         .permitAll()
         .and()
         .authorizeRequests()
@@ -43,6 +43,9 @@ public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
 
     // 自定義錯誤頁面
     http.exceptionHandling().accessDeniedPage("/unauth.html");
+
+    // logout
+    http.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html").permitAll();
   }
 
   //  @Override
