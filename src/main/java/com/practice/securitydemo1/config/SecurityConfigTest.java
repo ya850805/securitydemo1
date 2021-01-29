@@ -31,13 +31,18 @@ public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .antMatchers("/", "/user/login", "/hello") // 設置哪些路徑可以直接訪問，不需要認證
         .permitAll()
-//        .antMatchers("/index").hasAuthority("admins,manager") // 當前登入用戶需要有admins權限才能訪問/index
-        .antMatchers("/index").hasAnyAuthority("admins,manager") // 當前登入用戶需要有admins或manager權限才能訪問/index
+//        .antMatchers("/index").hasAuthority("admins") // 當前登入用戶需要有admins權限才能訪問/index
+//        .antMatchers("/index").hasAnyAuthority("admins,manager") // 當前登入用戶需要有admins或manager權限才能訪問/index
+//        .antMatchers("/index").hasRole("sale") // 底層變為ROLE_sale去判斷
+        .antMatchers("/index").hasAnyRole("sale,manager")
         .anyRequest()
         .authenticated()
         .and()
         .csrf()
         .disable(); // 關閉csrf防護
+
+    // 自定義錯誤頁面
+    http.exceptionHandling().accessDeniedPage("/unauth.html");
   }
 
   //  @Override
