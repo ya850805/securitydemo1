@@ -1,5 +1,6 @@
 package com.practice.securitydemo1.config;
 
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,11 +10,22 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 @Configuration
 public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
 
   @Autowired private UserDetailsService userDetailsService;
+
+  @Autowired private DataSource dataSource;
+
+  @Bean
+  public PersistentTokenRepository persistentTokenRepository() {
+    JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+    jdbcTokenRepository.setDataSource(dataSource);
+    return jdbcTokenRepository;
+  }
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -31,10 +43,12 @@ public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .antMatchers("/", "/user/login", "/hello") // 設置哪些路徑可以直接訪問，不需要認證
         .permitAll()
-//        .antMatchers("/index").hasAuthority("admins") // 當前登入用戶需要有admins權限才能訪問/index
-//        .antMatchers("/index").hasAnyAuthority("admins,manager") // 當前登入用戶需要有admins或manager權限才能訪問/index
-//        .antMatchers("/index").hasRole("sale") // 底層變為ROLE_sale去判斷
-        .antMatchers("/index").hasAnyRole("sale,manager")
+        //        .antMatchers("/index").hasAuthority("admins") // 當前登入用戶需要有admins權限才能訪問/index
+        //        .antMatchers("/index").hasAnyAuthority("admins,manager") //
+        // 當前登入用戶需要有admins或manager權限才能訪問/index
+        //        .antMatchers("/index").hasRole("sale") // 底層變為ROLE_sale去判斷
+        .antMatchers("/index")
+        .hasAnyRole("sale,manager")
         .anyRequest()
         .authenticated()
         .and()
@@ -46,6 +60,12 @@ public class SecurityConfigTest extends WebSecurityConfigurerAdapter {
 
     // logout
     http.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html").permitAll();
+
+    // 自動登入
+    http.rememberMe()
+        .tokenRepository(persistentTokenRepository())
+        .tokenValiditySeconds(120)
+        .userDetailsService(userDetailsService);
   }
 
   //  @Override
